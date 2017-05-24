@@ -199,6 +199,16 @@ local import_filter = {}
 		ctx.packages_resolved = true
 	end
 
+---
+--- inject package resolver into p.oven.bake
+---
+	function m.generateManifest(wks)
+		local tbl = {}
+		for _, pkg in pairs(wks.package_cache) do
+			pkg:generateManifest(tbl, wks)
+		end
+		return tbl
+	end
 
 
 ---
@@ -212,8 +222,8 @@ local import_filter = {}
 		print('Resolving Packages...')
 		verbosef('Package cache: %s', p.packagemanager.getCacheLocation())
 
-		for sln in p.global.eachSolution() do
-			for prj in p.solution.eachproject(sln) do
+		for wks in p.global.eachWorkspace() do
+			for prj in p.solution.eachproject(wks) do
 				if not prj.external then
 					verbosef("Resolving '%s'...", prj.name)
 
@@ -230,6 +240,21 @@ local import_filter = {}
 				end
 			end
 		end
+
+		-- Write package metadata.
+		print('Generating Package Manifests...')
+		for wks in p.global.eachWorkspace() do
+			local manifest = json.encode_pretty(m.generateManifest(wks))
+			if #manifest > 2 then
+				p.generate(wks, ".pmanifest", function()
+					p.utf8()
+					p.outln(manifest)
+				end)
+			end
+		end
+
+		-- Force a lua GC.
+		collectgarbage()
 	end)
 
 

@@ -47,6 +47,22 @@ function packageAPI:loadvariant(variant)
 	return variant
 end
 
+function packageAPI:generateManifest(tbl, wks)
+	local vtbl = {}
+	for _, v in pairs(self.variants) do
+		v:generateManifest(vtbl, wks)
+	end
+	if next(vtbl) == nil then
+		vtbl = nil
+	end
+
+	tbl[self.name] = {
+		type = "2.0",
+		version = self.version,
+		variants = vtbl
+	}
+end
+
 -- Importing API --------------------------------------------------------------
 
 local function __packageLocation(...)

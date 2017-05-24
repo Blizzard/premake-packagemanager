@@ -80,6 +80,27 @@ function api:matches(filter)
 	return criteria.matches(self.__compiled_filter, filter)
 end
 
+function api:generateManifest(tbl, wks)
+	if not self.loaded then
+		return
+	end
+
+	tbl[self.name] = {
+		location       = p.workspace.getrelative(wks, self.location),
+		system         = self.filter.system,
+		architecture   = self.filter.architecture,
+		toolset        = self.filter.toolset,
+		action         = self.filter.action,
+		configurations = self.filter.configurations,
+		tags           = self.filter.tags,
+		includedirs    = self.includes,
+		defines        = self.defines,
+		links          = self.links,
+		libdirs        = self.libdirs,
+		bindirs        = self.bindirs,
+	}
+end
+
 
 function m.createVariant(name)
 	local variant = {

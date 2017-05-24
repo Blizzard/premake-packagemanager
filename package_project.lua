@@ -17,6 +17,9 @@ end
 function packageAPI:loadvariant(variant)
 end
 
+function packageAPI:generateManifest(tbl, wks)
+end
+
 -- Importing API --------------------------------------------------------------
 
 function m.createProjectPackage(name, version)
