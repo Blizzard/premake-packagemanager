@@ -6,15 +6,14 @@
 
 local p = premake
 local m = p.modules.packagemanager
+local pm = p.packagemanager
 
-bnet = bnet or {}
 
 	local function __concat(...)
 		return table.concat(table.filterempty({...}), '-'):lower()
 	end
 
-	function bnet.translateSystem(system)
-		assert(type(system) == "string")
+	function pm.translateSystem(system)
 		if system == "windows" then
 			return "win32"
 		elseif system == 'macosx' then
@@ -23,7 +22,7 @@ bnet = bnet or {}
 		return system
 	end
 
-	function bnet.translateAction(action)
+	function pm.translateAction(action)
 		local var = action or _ACTION
 
 		if var == "vs2010" then
@@ -49,14 +48,14 @@ bnet = bnet or {}
 		return var
 	end
 
-	function bnet.translateArchitecture(arch)
+	function pm.translateArchitecture(arch)
 		if arch == 'x86' then
 			arch = "i386"
 		end
 		return arch
 	end
 
-	function bnet.translateConfig(config)
+	function pm.translateConfig(config)
 		return config
 	end
 
@@ -64,45 +63,26 @@ bnet = bnet or {}
 ---
 -- Create a variant from the current configuration
 ---
-	function bnet.buildVariantFromConfig(cfg)
-		local os         = bnet.translateSystem(cfg.system or os.target())
-		local action     = bnet.translateAction(_ACTION)
-		local arch       = bnet.translateArchitecture(cfg.architecture)
-		local config     = bnet.translateConfig(cfg.buildcfg)
+	function pm.buildVariantFromConfig(cfg)
+		local os         = pm.translateSystem(cfg.system or os.target())
+		local action     = pm.translateAction(_ACTION)
+		local arch       = pm.translateArchitecture(cfg.architecture)
+		local config     = pm.translateConfig(cfg.buildcfg)
 		return __concat(os, arch, action, config):lower()
 	end
 
 
 ---
--- Deprecate old cfg.bnet.variant context.
----
-	function bnet.new()
-		return {
-			variant = function (cfg)
-				p.warnOnce("cfg.bnet.variant", "'cfg.bnet.variant' is deprecated, use 'bnet.buildVariantFromConfig(cfg)' instead.")
-				return bnet.buildVariantFromConfig(cfg)
-			end
-		}
-	end
-
-	p.override(p.context, "new", function (base, cfgset, environ)
-		local ctx = base(cfgset, environ)
-		ctx.bnet = bnet.new()
-		return ctx
-	end)
-
-
----
 -- Create a table of variants.
 ---
-	function bnet.buildVariantsFromFilter(filter)
-		local action   = bnet.translateAction(filter.action)
-		local arch     = bnet.translateArchitecture(filter.architecture)
-		local config   = bnet.translateConfig(filter.configuration)
+	function pm.buildVariantsFromFilter(filter)
+		local action   = pm.translateAction(filter.action)
+		local arch     = pm.translateArchitecture(filter.architecture)
+		local config   = pm.translateConfig(filter.configuration)
 
 		local result = {}
 		for _, sys in ipairs(filter.system) do
-			local os = bnet.translateSystem(sys)
+			local os = pm.translateSystem(sys)
 			table.insert(result, __concat(os, arch, action, config)) -- Check for [os]-[arch]-[action]-[config]
 			table.insert(result, __concat(os, arch, action))         -- Check for [os]-[arch]-[action]
 			table.insert(result, __concat(os, arch, config))         -- Check for [os]-[arch]-[config]
@@ -146,7 +126,7 @@ bnet = bnet or {}
 ---
 -- Find a system tag in a set of tags.
 ---
-	function bnet.findSystem(tags)
+	function pm.findSystem(tags)
 		local map = {
 			["android"] = "android",
 			["posix"] = "posix",
@@ -175,7 +155,7 @@ bnet = bnet or {}
 ---
 -- Find a toolset tag in a set of tags.
 ---
-	function bnet.findToolset(tags)
+	function pm.findToolset(tags)
 		local map = {
 			["gcc"]      = "gcc",
 			["gcc41"]    = "gcc41",
@@ -202,7 +182,7 @@ bnet = bnet or {}
 ---
 -- Find an architecture tag in a set of tags.
 ---
-	function bnet.findArchitecture(tags)
+	function pm.findArchitecture(tags)
 		local map = {
 			["x86"]    = "x86",
 			["i386"]   = "x86",
@@ -221,7 +201,7 @@ bnet = bnet or {}
 ---
 -- Find an configuration tag in a set of tags.
 ---
-	function bnet.findConfig(tags)
+	function pm.findConfig(tags)
 		local map = {
 			["debug"]       = "debug",
 			["debugopt"]    = "debugopt",
@@ -238,7 +218,7 @@ bnet = bnet or {}
 ---
 -- Create a filter table from a variant name.
 ---
-	function bnet.filterFromVariant(name)
+	function pm.filterFromVariant(name)
 		if (name == "noarch") or (name == "universal") then
 			return {}
 		end
@@ -255,10 +235,10 @@ bnet = bnet or {}
 		__find(ignore, parts)
 
 		-- find system, toolset, architecture and config.
-		result.system         = bnet.findSystem(parts)
-		result.toolset        = bnet.findToolset(parts)
-		result.architecture   = bnet.findArchitecture(parts)
-		result.configurations = bnet.findConfig(parts)
+		result.system         = pm.findSystem(parts)
+		result.toolset        = pm.findToolset(parts)
+		result.architecture   = pm.findArchitecture(parts)
+		result.configurations = pm.findConfig(parts)
 
 		-- the remaining tags are uses as 'tags'
 		if #parts > 0 then
@@ -268,20 +248,4 @@ bnet = bnet or {}
 		return m.validateFilter(result)
 	end
 
-
----
--- Setup some defaults we use here and there.
----
-	bnet.build_custom_variant = nil
-	bnet.build_dir    = path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to or 'build')
-	bnet.projects_dir = path.join(bnet.build_dir, 'projects')
-	bnet.bin_dir      = path.join(_MAIN_SCRIPT_DIR, "bin/%{cfg.buildcfg}")
-	bnet.obj_dir      = path.join(bnet.build_dir, "%{bnet.buildVariantFromConfig(cfg)}/obj")
-	bnet.lib_dir      = path.join(bnet.build_dir, "%{bnet.buildVariantFromConfig(cfg)}/lib")
-
-	verbosef("bnet.build_dir   : %s", bnet.build_dir)
-	verbosef("bnet.projects_dir: %s", bnet.projects_dir)
-	verbosef("bnet.obj_dir     : %s", bnet.obj_dir)
-	verbosef("bnet.lib_dir     : %s", bnet.lib_dir)
-	verbosef("bnet.bin_dir     : %s", bnet.bin_dir)
 

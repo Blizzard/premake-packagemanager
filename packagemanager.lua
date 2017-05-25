@@ -10,18 +10,7 @@ p.modules.packagemanager._VERSION = p._VERSION
 
 local m = p.modules.packagemanager
 
--- include the rest of the module ---------------------------------------------
-
-include 'util.lua'
-include 'context.lua'
-include 'httpext.lua'
-include 'variant.lua'
-include 'package.lua'
-include 'package_base.lua'
-include 'package_project.lua'
-include 'packageresolver.lua'
-
---[ Global package manager ] --------------------------------------------------
+--[ Global package manager namespace ] ----------------------------------------
 
 p.packagemanager = {
 	cache_location    = nil,
@@ -37,6 +26,20 @@ p.packagemanager = {
 }
 
 local pm = p.packagemanager
+
+-- include the rest of the module ---------------------------------------------
+
+include 'util.lua'
+include 'context.lua'
+include 'httpext.lua'
+include 'variant.lua'
+include 'package.lua'
+include 'package_base.lua'
+include 'package_project.lua'
+include 'packageresolver.lua'
+include 'deprecated.lua'
+
+--[ local private variables ] -------------------------------------------------
 
 local __loaded = {}
 

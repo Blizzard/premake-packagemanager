@@ -21,7 +21,7 @@ end
 
 local function __createVariant(name, location, server)
 	local variant = m.createVariant(name)
-	variant.filter   = bnet.filterFromVariant(name)
+	variant.filter   = p.packagemanager.filterFromVariant(name)
 	variant.location = location
 	variant.server   = server
 	return variant
@@ -174,12 +174,12 @@ function packageAPI:loadvariants(filter)
 
 	-- Check if there is a build_custom_variant method, and use that.
 	if type(bnet.build_custom_variant) == 'function' then
-		p.warnOnce("build_custom_variant", "'bnet.build_custom_variant' is deprecated, use the 'variantmap' API instead.")
+		--p.warnOnce("build_custom_variant", "'bnet.build_custom_variant' is deprecated, use the 'variantmap' API instead.")
 		table.insertflat(check, bnet.build_custom_variant(filter, options))
 	end
 
 	-- Check the default variants.
-	table.insertflat(check, bnet.buildVariantsFromFilter(filter))
+	table.insertflat(check, p.packagemanager.buildVariantsFromFilter(filter))
 	table.insert(check, 'noarch')
 	table.insert(check, 'universal')
 

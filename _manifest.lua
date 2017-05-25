@@ -16,4 +16,5 @@ return {
 	'package_v1.lua',
 	'package_v2.lua',
 	'variant.lua',
+	'deprecated.lua',
 }
