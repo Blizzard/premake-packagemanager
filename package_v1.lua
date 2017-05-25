@@ -173,9 +173,9 @@ function packageAPI:loadvariants(filter)
 	local check   = { }
 
 	-- Check if there is a build_custom_variant method, and use that.
-	if type(bnet.build_custom_variant) == 'function' then
-		--p.warnOnce("build_custom_variant", "'bnet.build_custom_variant' is deprecated, use the 'variantmap' API instead.")
-		table.insertflat(check, bnet.build_custom_variant(filter, options))
+	if filter.cfg ~= nil and type(bnet.build_custom_variant) == 'function' then
+		--p.warnOnce("build_custom_variant", "'bnet.build_custom_variant(cfg, options)' is deprecated, use the 'variantmap' API instead.")
+		table.insertflat(check, bnet.build_custom_variant(filter.cfg, options))
 	end
 
 	-- Check the default variants.

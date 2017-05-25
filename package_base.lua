@@ -44,6 +44,7 @@ function m.createPackageBase(name, version)
 			toolset        = cfg.toolset,
 			configurations = cfg.buildcfg,
 			tags           = cfg.tags,
+			cfg            = cfg
 		}
 
 		result = {}
