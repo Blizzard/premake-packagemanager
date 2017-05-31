@@ -103,7 +103,6 @@ local function __download(hostname, name, version, variant)
 	end
 
 	-- calculate standard file_url.
-	local destination = location .. '.zip'
 	local file        = http.escapeUrlParam(name) .. '/' .. http.escapeUrlParam(version) .. '/' .. http.escapeUrlParam(variant) .. '.zip'
 	local file_url    = hostname .. '/' .. file
 
@@ -119,9 +118,19 @@ local function __download(hostname, name, version, variant)
 		if type(info_tbl.state) == "string" and info_tbl.state:lower() ~= 'active' then
 			premake.warn('"%s/%s" is marked "%s", consider upgrading to a known good version.', name, version, info_tbl.state)
 		end
+
+		if info_tbl.version then
+			location = __packageLocation(p.packagemanager.getCacheLocation(), name, info_tbl.version, variant)
+			if os.isdir(location) then
+				verbosef('CACHED: %s', location)
+				return location
+			end
+		end
 	end
 
-	-- Download file.
+	-- Download the file.
+	local destination = location .. '.zip'
+
 	print(' DOWNLOAD: ' .. file_url)
 	os.mkdir(path.getdirectory(destination))
 	local result_str, response_code = http.download(file_url, destination,

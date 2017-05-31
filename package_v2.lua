@@ -119,6 +119,15 @@ local function __getPackageFolder(name, version)
 			p.warn('"%s/%s" is marked "%s", consider upgrading to a known good version.', name, version, info.state)
 		end
 
+		if info.version then
+			version = info.version
+			location = __packageLocation(p.packagemanager.getCacheLocation(), name, version)
+			if __isPackage(location) then
+				verbosef(' CACHED: %s', location)
+				return location
+			end
+		end
+
 		-- create destination folder.
 		os.mkdir(location)
 
