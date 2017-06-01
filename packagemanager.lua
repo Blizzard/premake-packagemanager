@@ -42,6 +42,7 @@ include 'deprecated.lua'
 --[ local private variables ] -------------------------------------------------
 
 local __loaded = {}
+local __aliases = {}
 
 --[ private functions ]----------------------------------------------------
 
@@ -136,6 +137,10 @@ local __loaded = {}
 		for name, version in pairs(tbl) do
 			local realname, aliases = __getAliasTable(name)
 
+			if name:lower() ~= realname:lower() then
+				p.warn("Using the alias '%s' is deprecated, use the real name '%s'.", name, realname)
+			end
+
 			if not wks.package_cache[realname] then
 				local pkg = __importPackage(realname, version)
 				table.insert(init_table, pkg)
@@ -144,6 +149,7 @@ local __loaded = {}
 				for _, alias in ipairs(aliases) do
 					verbosef("ALIAS: '%s' aliased to '%s'.", realname, alias)
 					wks.package_cache[alias] = pkg
+					__aliases[alias] = realname
 				end
 			else
 				p.warn("Package '%s' already imported.", realname)
@@ -188,6 +194,12 @@ local __loaded = {}
 		if wks == nil then
 			error("No workspace in scope.", 3)
 		end
+
+		local realname = __aliases[name:lower()]
+		if realname ~= nil then
+			p.warn("Using the alias '%s' is deprecated, use the real name '%s'.", name, realname)
+		end
+
 		return wks.package_cache[name:lower()]
 	end
 
