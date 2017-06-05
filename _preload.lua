@@ -67,6 +67,11 @@ local p = premake
 		pathVars = true,
 	}
 
+	p.api.register {
+		name = 'lockfile',
+		scope = 'global',
+		kind = 'file',
+	}
 
 ---
 -- shortcut if you need both include & link dependencies

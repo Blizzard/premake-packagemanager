@@ -43,6 +43,7 @@ include 'deprecated.lua'
 
 local __loaded = {}
 local __aliases = {}
+local __loadedLockFile = nil
 
 --[ private functions ]----------------------------------------------------
 
@@ -71,6 +72,85 @@ local __aliases = {}
 
 
 ---
+-- Load lockfile.
+---
+	local function __loadLockFile()
+		if __loadedLockFile ~= nil then
+			return __loadedLockFile
+		end
+
+		local g = p.api.rootContainer()
+		local fn = g.lockfile or path.join(_MAIN_SCRIPT_DIR, ".lockfile")
+
+		local text = io.readfile(fn)
+		if text == nil then
+			__loadedLockFile = {}
+		else
+			local result, err = json.decode(text)
+			if result == nil then
+				p.error(err)
+			end
+			__loadedLockFile = result
+		end
+
+		return __loadedLockFile
+	end
+
+
+---
+-- Find the first version that matches the pattern.
+---
+	local function __findVersion(name, pattern)
+		local versions = {}
+
+		-- if we don't want to do any http queries, exit.
+		if _OPTIONS['no-http'] then
+			return nil
+		end
+
+		-- ask server for a sorted list of available versions
+		local link = '/api/v1/versions/' .. http.escapeUrlParam(name)
+		local tbl = http.getJson(pm.servers, link)
+		if tbl ~= nil then
+			for _, entry in ipairs(tbl) do
+				local v = entry.version
+				if v:match(pattern) == v then
+					table.insert(versions, v)
+				end
+			end
+		end
+
+		-- no matching results?
+		if #versions <= 0 then
+			return nil
+		end
+
+		-- first result is best available match.
+		return versions[1]
+	end
+
+---
+-- Find the first version that matches the pattern.
+---
+
+	local function __getGitVersion(name, version)
+		-- if we don't want to do any http queries, exit.
+		if _OPTIONS['no-http'] then
+			return nil
+		end
+
+		-- ask for the type of package, which returns a pre-cached release.
+		local link = '/api/v1/type/' .. http.escapeUrlParam(name) .. '/' .. http.escapeUrlParam(version)
+		local tbl = http.getJson(pm.servers, link)
+
+		if tbl ~= nil then
+			return tbl.version
+		end
+
+		return nil
+	end
+
+---
 -- Import a single package...
 ---
 	local function __importPackage(name, version)
@@ -87,6 +167,66 @@ local __aliases = {}
 		-- option overrides version from table.
 		version = _OPTIONS[optionname] or version
 
+		-- test if there is a '*' in the version number...
+		if version:contains('*') then
+			local lockfile = __loadLockFile()
+			local pattern = path.wildcards(version)
+			local id = name .. '/' .. version
+
+			-- Find in LockFile
+			local v = lockfile[id]
+
+			-- If we didn't find it in the lockfile, find a matching version.
+			if v == nil then
+				v = __findVersion(name, pattern)
+				if v == nil then
+					p.error("No version matching the pattern '%s', was found for package '%s'.", version, name)
+				else
+					p.info("Found '%s' for '%s', pattern: '%s'.", v, name, version)
+				end
+			else
+				p.info("Using '%s' for '%s', pattern: '%s'.", v, name, version)
+			end
+
+			-- Update version.
+			version = v
+
+			-- and store in global lockfile.
+			local g = p.api.rootContainer()
+			g.__lockfile = g.__lockfile or {}
+			g.__lockfile[id] = v
+		end
+
+		-- deal with translating git| versions.
+		if version:startswith("git|") then
+			local lockfile = __loadLockFile()
+			local id = name .. '/' .. version
+
+			-- Find in LockFile
+			local v = lockfile[id]
+
+			-- If we didn't find it in the lockfile, we need to ask the server for a hash.
+			if v == nil then
+				v = __getGitVersion(name, version)
+				if v == nil then
+					p.error("No git hash was found for package '%s' using reference '%s'.", name, version:sub(5))
+				else
+					p.info("Found '%s' for '%s', reference: '%s'.", v, name, version:sub(5))
+				end
+			else
+				p.info("Using '%s' for '%s', reference: '%s'.", v, name, version:sub(5))
+			end
+
+			-- Update version.
+			version = 'git|' .. v
+
+			-- and store in global lockfile.
+			local g = p.api.rootContainer()
+			g.__lockfile = g.__lockfile or {}
+			g.__lockfile[id] = v
+		end
+
+		-- now initialize the package.
 		for _, pkgsys in ipairs(pm.systems) do
 			local pkg = pkgsys(name, version)
 			if pkg ~= nil then
@@ -94,7 +234,7 @@ local __aliases = {}
 			end
 		end
 
-		error(string.format("No package '%s' version '%s' was found.", name, version))
+		p.error("No package '%s' version '%s' was found.", name, version)
 	end
 
 
@@ -292,6 +432,31 @@ local __aliases = {}
 			return "Package Manager"
 		end,
 	})
+
+
+---
+--- inject lockfile store into p.main.preBake
+---
+	p.override(p.main, "postBake", function (base)
+		-- write the lockfile.
+		local g = p.api.rootContainer()
+		local fn = g.lockfile or path.join(_MAIN_SCRIPT_DIR, ".lockfile")
+
+		if g.__lockfile ~= nil then
+			local lockfile = json.encode_pretty(g.__lockfile)
+			if #lockfile > 2 then
+				os.mkdir(path.getdirectory(fn))
+				local f, err = os.writefile_ifnotequal(lockfile, fn);
+			else
+				os.remove(fn)
+			end
+		else
+			os.remove(fn)
+		end
+
+		-- now run the prebake.
+		base()
+	end)
 
 
 -- return the module pointer.
