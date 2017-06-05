@@ -78,7 +78,7 @@ local pm = p.packagemanager
 	function pm.buildVariantsFromFilter(filter)
 		local action   = pm.translateAction(filter.action)
 		local arch     = pm.translateArchitecture(filter.architecture)
-		local config   = pm.translateConfig(filter.configuration)
+		local config   = pm.translateConfig(filter.configurations)
 
 		local result = {}
 		for _, sys in ipairs(filter.system) do
