@@ -19,6 +19,16 @@ if not _OPTIONS['compiler'] then
 end
 
 
+function m.createPackageLocation(...)
+	local location = path.join(...)
+	location = path.normalize(location)
+	location = location:gsub('%s+', '_')
+	location = location:gsub('%(', '_')
+	location = location:gsub('%)', '_')
+	return location
+end
+
+
 function m.checkType(name, value, t)
 	if value == nil then
 		return true

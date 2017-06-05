@@ -65,16 +65,6 @@ end
 
 -- Importing API --------------------------------------------------------------
 
-local function __packageLocation(...)
-	local location = path.join(...)
-	location = path.normalize(location)
-	location = location:gsub('%s+', '_')
-	location = location:gsub('%(', '_')
-	location = location:gsub('%)', '_')
-	return location
-end
-
-
 local function __isPackage(folder)
 	local filename = path.join(folder, 'premake5-meta.lua')
 	return os.isfile(filename)
@@ -92,7 +82,7 @@ local function __getPackageFolder(name, version)
 
 	-- test if we have the package locally.
 	for _, folder in ipairs(p.packagemanager.folders) do
-		local location = __packageLocation(folder, name, version)
+		local location = m.createPackageLocation(folder, name, version)
 		if __isPackage(location) then
 			verbosef(' LOCAL: %s', location)
 			return location
@@ -100,7 +90,7 @@ local function __getPackageFolder(name, version)
 	end
 
 	-- test if we downloaded it already.
-	local location = __packageLocation(p.packagemanager.getCacheLocation(), name, version)
+	local location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, version)
 	if __isPackage(location) then
 		verbosef(' CACHED: %s', location)
 		return location
@@ -121,7 +111,7 @@ local function __getPackageFolder(name, version)
 
 		if info.version then
 			version = info.version
-			location = __packageLocation(p.packagemanager.getCacheLocation(), name, version)
+			location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, version)
 			if __isPackage(location) then
 				verbosef(' CACHED: %s', location)
 				return location
@@ -132,7 +122,7 @@ local function __getPackageFolder(name, version)
 		os.mkdir(location)
 
 		-- download to packagecache/name-version.zip.
-		local destination = __packageLocation(p.packagemanager.getCacheLocation(), name .. '-' .. version .. '.zip')
+		local destination = m.createPackageLocation(p.packagemanager.getCacheLocation(), name .. '-' .. version .. '.zip')
 
 		print(' DOWNLOAD: ' .. info.url)
 		local result_str, response_code = http.download(info.url, destination,

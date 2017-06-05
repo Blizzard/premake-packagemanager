@@ -9,16 +9,6 @@ local m = p.modules.packagemanager
 
 -- Package API ----------------------------------------------------------------
 
-local function __packageLocation(...)
-	local location = path.join(...)
-	location = path.normalize(location)
-	location = location:gsub('%s+', '_')
-	location = location:gsub('%(', '_')
-	location = location:gsub('%)', '_')
-	return location
-end
-
-
 local function __createVariant(name, location, server)
 	local variant = m.createVariant(name)
 	variant.filter   = p.packagemanager.filterFromVariant(name)
@@ -43,7 +33,7 @@ local function __getVariants(name, version)
 
 	-- test if we have the package locally.
 	for i, folder in ipairs(p.packagemanager.folders) do
-		local location = __packageLocation(folder, name, version)
+		local location = m.createPackageLocation(folder, name, version)
 		if os.isdir(location) then
 			for i, dir in pairs(os.matchdirs(location .. '/*')) do
 				local n, variant = string.match(dir, '(.+)[\\|/](.+)')
@@ -80,10 +70,15 @@ local function __getVariants(name, version)
 	return result
 end
 
-local function __download(hostname, name, version, variant)
+local function __download(pkg, var)
+	local name     = pkg.name
+	local version  = pkg.version
+	local variant  = var.name
+	local hostname = var.server
+
 	-- first see if we can find the package locally.
 	for i, folder in pairs(p.packagemanager.folders) do
-		local location = __packageLocation(folder, name, version, variant)
+		local location = m.createPackageLocation(folder, name, version, variant)
 		if os.isdir(location) then
 			verbosef('LOCAL: %s', location)
 			return location
@@ -91,7 +86,7 @@ local function __download(hostname, name, version, variant)
 	end
 
 	-- then try the package cache.
-	local location = __packageLocation(p.packagemanager.getCacheLocation(), name, version, variant)
+	local location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, version, variant)
 	if os.isdir(location) then
 		verbosef('CACHED: %s', location)
 		return location
@@ -120,7 +115,7 @@ local function __download(hostname, name, version, variant)
 		end
 
 		if info_tbl.version then
-			location = __packageLocation(p.packagemanager.getCacheLocation(), name, info_tbl.version, variant)
+			location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, info_tbl.version, variant)
 			if os.isdir(location) then
 				verbosef('CACHED: %s', location)
 				return location
@@ -222,7 +217,7 @@ function packageAPI:loadvariant(variant)
 	verbosef(' LOAD %s/%s', self.name, variant.name)
 
 	-- download it first, in case that hasn't happened yet?
-	local directory = __download(variant.server, self.name, self.version, variant.name)
+	local directory = __download(self, variant)
 
 	-- register package as loaded
 	variant.loaded   = true
