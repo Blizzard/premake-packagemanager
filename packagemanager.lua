@@ -381,6 +381,7 @@ local __loadedLockFile = nil
 			if package.current then
 				-- set package on project.
 				prj.package = package.current.package
+				prj.frompackage = true
 
 				-- set some default package values.
 				prj.blocks[1].targetdir = bnet.lib_dir
