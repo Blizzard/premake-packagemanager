@@ -262,14 +262,16 @@ local __loadedLockFile = nil
 ---
 	function pm.import(tbl)
 		if (not tbl) or (type(tbl) ~= "table") then
-			error("Invalid argument to import.")
+			local caller = filelineinfo(2)
+			p.error("Invalid argument to import.\n   @%s\n", caller)
 		end
 
 		-- we always need to have a workspace.
 		local scope = p.api.scope.current
 		local wks   = p.api.scope.workspace
 		if (wks == nil) or (wks ~= scope) then
-			error("Workspace must be the current scope.")
+			local caller = filelineinfo(2)
+			p.error("Workspace must be the current scope. Current scope is '%s'. \n   @%s\n", scope.name, caller)
 		end
 
 		-- import packages.
@@ -278,7 +280,8 @@ local __loadedLockFile = nil
 			local realname, aliases = __getAliasTable(name)
 
 			if name:lower() ~= realname:lower() then
-				p.warn("Using the alias '%s' is deprecated, use the real name '%s'.", name, realname)
+				local caller = filelineinfo(2)
+				p.warn("Using the alias '%s' is deprecated, use the real name '%s'.\n   @%s\n", name, realname, caller)
 			end
 
 			if not wks.package_cache[realname] then
@@ -385,14 +388,15 @@ local __loadedLockFile = nil
 				prj.blocks[1].location  = path.join(bnet.projects_dir, 'packages')
 
 			elseif parent ~= nil then
-				local p = parent.package_cache[name:lower()]
+				name = name:lower()
+				local p = parent.package_cache[name]
 				if p then
 					error("Package '" .. name .. "' already exists in the solution.")
 				end
 
 				-- set package on project.
 				prj.package = m.createProjectPackage(name)
-				parent.package_cache[name:lower()] = prj.package
+				parent.package_cache[name] = prj.package
 			end
 
 			-- add project to package.
