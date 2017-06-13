@@ -269,9 +269,9 @@ local __loadedLockFile = nil
 		-- we always need to have a workspace.
 		local scope = p.api.scope.current
 		local wks   = p.api.scope.workspace
-		if (wks == nil) or (wks ~= scope) then
+		if wks == nil then
 			local caller = filelineinfo(2)
-			p.error("Workspace must be the current scope. Current scope is '%s'. \n   @%s\n", scope.name, caller)
+			p.error("No workspace is currently in scope.\n   @%s\n", caller)
 		end
 
 		-- import packages.
