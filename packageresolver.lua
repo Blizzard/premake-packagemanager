@@ -223,7 +223,7 @@ local import_filter = {}
 		verbosef('Package cache: %s', p.packagemanager.getCacheLocation())
 
 		for wks in p.global.eachWorkspace() do
-			for prj in p.solution.eachproject(wks) do
+			for prj in p.workspace.eachproject(wks) do
 				if not prj.external then
 					verbosef("Resolving '%s'...", prj.name)
 

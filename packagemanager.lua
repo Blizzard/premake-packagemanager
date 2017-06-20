@@ -392,7 +392,7 @@ local __loadedLockFile = nil
 				name = name:lower()
 				local p = parent.package_cache[name]
 				if p then
-					error("Package '" .. name .. "' already exists in the solution.")
+					error("Package '" .. name .. "' already exists in the workspace.")
 				end
 
 				-- set package on project.
