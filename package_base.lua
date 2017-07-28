@@ -169,5 +169,43 @@ function m.createPackageBase(name, version)
 		os.chdir(cwd)
 	end
 
+	function pkg:includeTests()
+		-- Remember the current _SCRIPT and working directory so we can restore them.
+		local cwd = os.getcwd()
+		local script = _SCRIPT
+		local scriptDir = _SCRIPT_DIR
+
+		-- Store current scope.
+		local scope = p.api.scope.current
+
+		-- go through each variant that is loaded, and execute the initializer.
+		for name, variant in pairs(self.variants) do
+			if variant.loaded and variant.testscript ~= nil then
+				-- Set the new _SCRIPT and working directory
+				_SCRIPT     = variant.testscript
+				_SCRIPT_DIR = variant.location
+				os.chdir(variant.location)
+
+				-- store current package context.
+				local previous_package = package.current
+				package.current = variant
+
+				-- execute the testscript
+				dofile(variant.testscript)
+
+				-- restore package context.
+				package.current = previous_package
+			end
+		end
+
+		-- restore current scope.
+		p.api.scope.current = scope
+
+		-- Finally, restore the previous _SCRIPT variable and working directory
+		_SCRIPT = script
+		_SCRIPT_DIR = scriptDir
+		os.chdir(cwd)
+	end
+
 	return pkg
 end

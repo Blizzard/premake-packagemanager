@@ -17,6 +17,7 @@ local __members = {
 	location    = "string",
 	server      = "string",
 	script      = "string",
+	testscript  = "string",
 	initializer = "function",
 	loaded      = "boolean",
 	package     = "table",

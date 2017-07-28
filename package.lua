@@ -39,3 +39,22 @@ package = package or {}
 		return p.packagemanager.import(tbl)
 	end
 
+
+---
+-- Execute all test scripts
+---
+	function includePackageTests()
+		local wks = p.api.scope.workspace
+		if wks == nil then
+			error("No workspace in scope.", 3)
+		end
+
+		-- go through each variant that is loaded, and execute the initializer.
+		for name, pkg in pairs(wks.package_cache) do
+			-- don't process aliases.
+			if name == pkg.name then
+				pkg:includeTests()
+			end
+		end
+	end
+

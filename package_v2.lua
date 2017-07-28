@@ -163,24 +163,26 @@ local function __createVariant(pkg, name, meta, dir)
 		error("Metadata entry for '" .. name .."' does not exist.")
 	end
 
-	m.checkType("includedirs", meta.includedirs, "table");
-	m.checkType("links",       meta.links,       "table");
-	m.checkType("libdirs",     meta.libdirs,     "table");
-	m.checkType("defines",     meta.defines,     "table");
-	m.checkType("bindirs",     meta.bindirs,     "table");
-	m.checkType("premake",     meta.premake,     "string");
+	m.checkType("includedirs", meta.includedirs, "table")
+	m.checkType("links",       meta.links,       "table")
+	m.checkType("libdirs",     meta.libdirs,     "table")
+	m.checkType("defines",     meta.defines,     "table")
+	m.checkType("bindirs",     meta.bindirs,     "table")
+	m.checkType("premake",     meta.premake,     "string")
+	m.checkType("tests",       meta.tests,       "string")
 
 	local variant = m.createVariant(name)
-	variant.filter   = __createFilter(meta)
-	variant.includes = meta.includedirs
-	variant.links    = meta.links
-	variant.libdirs  = meta.libdirs
-	variant.defines  = meta.defines
-	variant.bindirs  = meta.bindirs
-	variant.location = dir
-	variant.script   = meta.premake
-	variant.package  = pkg
-	variant.loaded   = false
+	variant.filter     = __createFilter(meta)
+	variant.includes   = meta.includedirs
+	variant.links      = meta.links
+	variant.libdirs    = meta.libdirs
+	variant.defines    = meta.defines
+	variant.bindirs    = meta.bindirs
+	variant.location   = dir
+	variant.script     = meta.premake
+	variant.testscript = meta.tests
+	variant.package    = pkg
+	variant.loaded     = false
 
 	-- if links wasn't set, then enumerate the libdirs if set
 	if meta.links == nil and meta.libdirs ~= nil then
