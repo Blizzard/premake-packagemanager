@@ -9,6 +9,9 @@ local m = p.modules.packagemanager
 
 bnet = bnet or {}
 
+
+
+
 ---
 -- Deprecate old cfg.bnet.variant context.
 ---
@@ -30,18 +33,54 @@ bnet = bnet or {}
 ---
 -- Setup some defaults we use here and there.
 ---
+
 	bnet.build_custom_variant = nil
 	bnet.build_dir    = path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to or 'build')
-	bnet.projects_dir = path.join(bnet.build_dir, 'projects')
+	bnet.projects_dir = "%{path.join(bnet.build_dir, 'projects')}"
 	bnet.bin_dir      = path.join(_MAIN_SCRIPT_DIR, "bin/%{cfg.buildcfg}")
-	bnet.obj_dir      = path.join(bnet.build_dir, "%{premake.packagemanager.buildVariantFromConfig(cfg)}/obj")
-	bnet.lib_dir      = path.join(bnet.build_dir, "%{premake.packagemanager.buildVariantFromConfig(cfg)}/lib")
+	bnet.obj_dir      = "%{path.join(bnet.build_dir, premake.packagemanager.buildVariantFromConfig(cfg), 'obj')}"
+	bnet.lib_dir      = "%{path.join(bnet.build_dir, premake.packagemanager.buildVariantFromConfig(cfg), 'lib')}"
 
-	verbosef("bnet.build_dir   : %s", bnet.build_dir)
 	verbosef("bnet.projects_dir: %s", bnet.projects_dir)
 	verbosef("bnet.obj_dir     : %s", bnet.obj_dir)
 	verbosef("bnet.lib_dir     : %s", bnet.lib_dir)
 	verbosef("bnet.bin_dir     : %s", bnet.bin_dir)
+
+	setmetatable(bnet, {
+		__metatable = false,
+		__newindex = function(tbl, key, value)
+			if (key == "build_dir") then
+				p.warn("'bnet.build_dir' is deprecated, there is no equivalent.")
+
+			elseif (key == "projects_dir") then
+				p.warn("'bnet.projects_dir' is deprecated, use the 'package_location' API instead.")
+				assert(type(value) == "string", "projects_dir must be a string.")
+				package_location(value)
+
+			elseif (key == "obj_dir") then
+				p.warn("'bnet.obj_dir' is deprecated, use the 'package_objdir' API instead.")
+				assert(type(value) == "string", "obj_dir must be a string.")
+				package_objdir(value)
+
+			elseif (key == "lib_dir") then
+				p.warn("'bnet.lib_dir' is deprecated, use the 'package_libdir' API instead.")
+				assert(type(value) == "string", "lib_dir must be a string.")
+				package_location(value)
+
+			elseif (key == "bin_dir") then
+				p.warn("'bnet.bin_dir' is deprecated, use the 'package_bindir' API instead.")
+				assert(type(value) == "string", "bin_dir must be a string.")
+				package_location(value)
+
+			else
+				p.warn("Access to 'bnet' deprecated: " .. key)
+			end
+
+			rawset(tbl, key, value)
+		end,
+	})
+
+
 
 ---
 -- Deprecated 'global' functions.
@@ -101,7 +140,7 @@ bnet = bnet or {}
 
 
 	function _build_config(ctx)
-		p.warnOnce("_build_config", "'_build_variant' is deprecated.")
+		p.warnOnce("_build_config", "'_build_config(cfg)' is deprecated.")
 
 		local var = ctx.buildcfg
 		if var == "Debug" then

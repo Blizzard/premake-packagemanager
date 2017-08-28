@@ -68,10 +68,60 @@ local p = premake
 	}
 
 	p.api.register {
-		name = 'lockfile',
+		name  = 'lockfile',
 		scope = 'global',
-		kind = 'file',
+		kind  = 'file',
 	}
+
+
+---
+-- API's to control the output folders for imported packages.
+---
+	p.api.register {
+		name     = 'package_location',
+		scope    = 'project',
+		kind     = 'path',
+		tokens   = true,
+		pathVars = true,
+	}
+
+	p.api.register {
+		name     = 'package_buildlog',
+		scope    = 'config',
+		kind     = 'path',
+		tokens   = true,
+		pathVars = true,
+	}
+
+	p.api.register {
+		name     = 'package_objdir',
+		scope    = 'config',
+		kind     = 'path',
+		tokens   = true,
+		pathVars = true,
+	}
+
+	p.api.register {
+		name     = 'package_libdir', -- this controls the targetdir for StaticLib projects.
+		scope    = 'config',
+		kind     = 'path',
+		tokens   = true,
+		pathVars = true,
+	}
+
+	p.api.register {
+		name     = 'package_bindir', -- this controls the targetdir for SharedLib, WindowedApp and ConsoleApp projects.
+		scope    = 'config',
+		kind     = 'path',
+		tokens   = true,
+		pathVars = true,
+	}
+
+	-- initialize sane defaults.
+	package_location (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, 'projects/packages'))
+	package_bindir   (path.join(_MAIN_SCRIPT_DIR, "bin/%{premake.packagemanager.buildVariantFromConfig(cfg)}"))
+	package_objdir   (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, '%{premake.packagemanager.buildVariantFromConfig(cfg)}', 'obj'))
+	package_libdir   (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, '%{premake.packagemanager.buildVariantFromConfig(cfg)}', 'lib'))
 
 ---
 -- shortcut if you need both include & link dependencies

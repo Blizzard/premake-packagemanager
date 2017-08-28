@@ -372,6 +372,17 @@ local __loadedLockFile = nil
 
 
 ---
+-- private callback for the package targetdir.
+---
+	function pm._selectTargetDir(cfg)
+		if cfg.kind == 'StaticLib' then
+			return cfg.package_libdir
+		else
+			return cfg.package_bindir
+		end
+	end
+
+---
 -- override 'project' so that when a package defines a new project we initialize it with some default values.
 ---
 	p.override(p.project, 'new', function(base, name, parent)
@@ -384,9 +395,10 @@ local __loadedLockFile = nil
 				prj.frompackage = true
 
 				-- set some default package values.
-				prj.blocks[1].targetdir = bnet.lib_dir
-				prj.blocks[1].objdir    = path.join(bnet.obj_dir, name)
-				prj.blocks[1].location  = path.join(bnet.projects_dir, 'packages')
+				prj.blocks[1].targetdir = "%{premake.packagemanager._selectTargetDir(cfg)}"
+				prj.blocks[1].objdir    = "%{cfg.package_objdir}/" .. name
+				prj.blocks[1].buildlog  = "%{cfg.package_buildlog}"
+				prj.blocks[1].location  = "%{prj.package_location}"
 
 			elseif parent ~= nil then
 				name = name:lower()
