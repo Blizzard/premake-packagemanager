@@ -65,12 +65,12 @@ bnet = bnet or {}
 			elseif (key == "lib_dir") then
 				p.warn("'bnet.lib_dir' is deprecated, use the 'package_libdir' API instead.")
 				assert(type(value) == "string", "lib_dir must be a string.")
-				package_location(value)
+				package_libdir(value)
 
 			elseif (key == "bin_dir") then
 				p.warn("'bnet.bin_dir' is deprecated, use the 'package_bindir' API instead.")
 				assert(type(value) == "string", "bin_dir must be a string.")
-				package_location(value)
+				package_bindir(value)
 
 			else
 				p.warn("Access to 'bnet' deprecated: " .. key)
