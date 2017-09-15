@@ -21,6 +21,7 @@ local __members = {
 	initializer = "function",
 	loaded      = "boolean",
 	package     = "table",
+	options     = "table",
 }
 
 local api = {}

@@ -137,6 +137,7 @@ function m.createPackageBase(name, version)
 		local scope = p.api.scope.current
 
 		-- go through each variant that is loaded, and execute the initializer.
+		local errors = {}
 		for name, variant in pairs(self.variants) do
 			if variant.loaded and variant.initializer then
 				-- Set the new _SCRIPT and working directory
@@ -148,12 +149,32 @@ function m.createPackageBase(name, version)
 				local previous_package = package.current
 				package.current = variant
 
-				-- execute the callback
+				-- add the criteria prefixes temporarily.
+				if variant.options then
+					for _, option in ipairs(variant.options) do
+						if criteria._validPrefixes[option] then
+							p.error('Cannot use a predefined filter prefix: %s', option)
+						end
+						criteria._validPrefixes[option] = true
+					end
+				end
+
+				-- execute the callback, capture errors until the end, when scope is restored.
 				verbosef('initialize(%s, %s, %s)', self.name, name, operation or 'nil')
-				variant.initializer('project')
+				local ok, err = pcall(variant.initializer, 'project')
+				if not ok then
+					table.insert(errors, err)
+				end
 
 				-- and clear it, so we don't do it again in the future.
 				variant.initializer = nil
+
+				-- restore the criteria prefixes.
+				if variant.options then
+					for _, option in ipairs(variant.options) do
+						criteria._validPrefixes[option] = nil
+					end
+				end
 
 				-- restore package context.
 				package.current = previous_package
@@ -167,6 +188,11 @@ function m.createPackageBase(name, version)
 		_SCRIPT = script
 		_SCRIPT_DIR = scriptDir
 		os.chdir(cwd)
+
+		-- throw the error if there was any.
+		if #errors > 0 then
+			p.error(table.concat(errors, "\n"))
+		end
 	end
 
 	function pkg:includeTests()

@@ -15,7 +15,7 @@ package = package or {}
 	function package.get(name)
 		local result = p.packagemanager.getPackage(name)
 		if not result then
-			error("Package was not imported; use 'import { ['" .. name .. "'] = 'version' }'.")
+			p.error("Package was not imported; use 'import { ['" .. name .. "'] = 'version' }'.")
 		end
 		return result
 	end
@@ -33,10 +33,22 @@ package = package or {}
 ---
 	function import(tbl)
 		if package.current then
-			error('Packages cannot import other package, only the top-level workspace can do that')
+			p.error('Packages cannot import other package, only the top-level workspace can do that')
 		end
 
 		return p.packagemanager.import(tbl)
+	end
+
+
+---
+-- Set/Get an option for a package.
+---
+	function setpackageoption(name, option, value)
+		p.packagemanager.setPackageOption(name, option, value)
+	end
+
+	function getpackageoption(name, option)
+		return p.packagemanager.getPackageOption(name, option)
 	end
 
 
@@ -46,7 +58,7 @@ package = package or {}
 	function includePackageTests()
 		local wks = p.api.scope.workspace
 		if wks == nil then
-			error("No workspace in scope.", 3)
+			p.error("No workspace in scope.", 3)
 		end
 
 		-- go through each variant that is loaded, and execute the initializer.

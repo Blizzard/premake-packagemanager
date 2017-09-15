@@ -170,6 +170,7 @@ local function __createVariant(pkg, name, meta, dir)
 	m.checkType("bindirs",     meta.bindirs,     "table")
 	m.checkType("premake",     meta.premake,     "string")
 	m.checkType("tests",       meta.tests,       "string")
+	m.checkType("options",     meta.options,     "table")
 
 	local variant = m.createVariant(name)
 	variant.filter     = __createFilter(meta)
@@ -181,6 +182,7 @@ local function __createVariant(pkg, name, meta, dir)
 	variant.location   = dir
 	variant.script     = meta.premake
 	variant.testscript = meta.tests
+	variant.options    = meta.options
 	variant.package    = pkg
 	variant.loaded     = false
 

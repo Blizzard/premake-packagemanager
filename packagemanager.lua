@@ -70,6 +70,13 @@ local __loadedLockFile = nil
 		return name:lower(), {}
 	end
 
+	local function __getRealname(name)
+		local realname, aliases = __getAliasTable(name)
+		if name:lower() ~= realname:lower() then
+			p.warn("Using the alias '%s' is deprecated, use the real name '%s'.", name, realname)
+		end
+		return realname
+	end
 
 ---
 -- Load lockfile.
@@ -348,6 +355,48 @@ local __loadedLockFile = nil
 
 
 ---
+-- Set/Get an option for a package.
+---
+	function pm.setPackageOption(name, option, value)
+		local realname = __getRealname(name):lower()
+		if pm.getPackage(realname) ~= nil then
+			error("Package options need to be set before you import the package.", 3)
+		end
+
+		local wks = p.api.scope.workspace
+		if wks == nil then
+			error("No workspace in scope.", 3)
+		end
+
+		-- store the value.
+		wks.package_options[realname] = wks.package_options[realname] or {}
+		wks.package_options[realname][option] = value
+	end
+
+	function pm.getPackageOption(name, option)
+		if option == nil then
+			local project = p.api.scope.project or prj
+			if project == nil then
+				error("No project in scope.", 3)
+			end
+
+			option = name
+			name   = project.package.name
+		end
+
+		local wks = p.api.scope.workspace
+		if wks == nil then
+			error("No workspace in scope.", 3)
+		end
+
+		local realname = __getRealname(name):lower()
+		local options = wks.package_options[realname]
+		if options ~= nil then
+			return options[option]
+		end
+	end
+
+---
 -- Resets the state of the package manager to it's default state.
 ---
 	function pm.reset()
@@ -366,8 +415,31 @@ local __loadedLockFile = nil
 ---
 	p.override(p.workspace, 'new', function(base, name)
 		local wks = base(name)
-		wks.package_cache = wks.package_cache or {}
+		wks.package_cache   = wks.package_cache or {}
+		wks.package_options = wks.package_options or {}
 		return wks
+	end)
+
+
+---
+-- override 'context.compile' so that we can inject the package options into the filters
+---
+	p.override(p.context, 'compile', function(base, ctx)
+		-- if this is a project and it was generated from a package, inject package options
+		-- into filter context.
+		if (ctx == ctx.project) and ctx.frompackage and ctx.variant.options then
+			local options = ctx.workspace.package_options[ctx.package.name]
+			if options ~= nil then
+				for _, option in ipairs(ctx.variant.options) do
+					local value = options[option]
+					if value ~= nil then
+						p.context.addFilter(ctx, option, tostring(value))
+					end
+				end
+			end
+		end
+
+		return base(ctx)
 	end)
 
 
@@ -392,6 +464,7 @@ local __loadedLockFile = nil
 			if package.current then
 				-- set package on project.
 				prj.package = package.current.package
+				prj.variant = package.current
 				prj.frompackage = true
 
 				-- set some default package values.
