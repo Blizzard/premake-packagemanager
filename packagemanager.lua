@@ -281,6 +281,13 @@ local __loadedLockFile = nil
 			p.error("No workspace is currently in scope.\n   @%s\n", caller)
 		end
 
+		-- override the 'group' function, packages shouldn't call it.
+		local groupFunc = _G['group']
+		_G['group'] = function(name)
+			local caller = filelineinfo(2)
+			p.warn("Using group '%s' inside package script.\n   @%s\n", name, caller)
+		end
+
 		-- import packages.
 		local init_table = {}
 		for name, version in pairs(tbl) do
@@ -330,6 +337,9 @@ local __loadedLockFile = nil
 
 			p.api._isIncludingExternal = nil
 		end
+
+		-- restore 'group' function.
+		_G['group'] = groupFunc
 
 		-- restore current scope.
 		p.api.scope.current = scope
