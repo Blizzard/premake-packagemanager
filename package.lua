@@ -29,6 +29,22 @@ package = package or {}
 
 
 ---
+-- check package version. Comparisions take the form of ">=5.0" (5.0 or later),
+-- "5.0" (5.0 or later), ">=5.0 <6.0" (5.0 or later but not 6.0 or later).
+---
+	function package.require(name, checks)
+		local pkg = p.packagemanager.getPackage(name)
+		if pkg == nil then
+			p.error("Package was not imported; use 'import { ['" .. name .. "'] = 'version' }'.", )
+		end
+
+		if not p.checkVersion(pkg.version, checks) then
+			p.error("Package version '" .. pkg.version .. "' does not meet '" .. checks .. "' requirement.")
+		end
+	end
+
+
+---
 -- Import a set of packages.
 ---
 	function import(tbl)
