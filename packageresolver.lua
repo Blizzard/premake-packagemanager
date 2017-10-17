@@ -244,7 +244,12 @@ local import_filter = {}
 		-- Write package metadata.
 		print('Generating Package Manifests...')
 		for wks in p.global.eachWorkspace() do
-			local manifest = json.encode_pretty(m.generateManifest(wks))
+			local mantbl = m.generateManifest(wks)
+			local manifest, err = json.encode_pretty(mantbl)
+			if manifest == nil then
+				p.error(err)
+			end
+
 			if #manifest > 2 then
 				p.generate(wks, ".pmanifest", function()
 					p.utf8()

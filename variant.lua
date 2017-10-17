@@ -95,11 +95,11 @@ function api:generateManifest(tbl, wks)
 		action         = self.filter.action,
 		configurations = self.filter.configurations,
 		tags           = self.filter.tags,
-		includedirs    = self.includes,
-		defines        = self.defines,
-		links          = self.links,
-		libdirs        = self.libdirs,
-		bindirs        = self.bindirs,
+		includedirs    = iif(type(self.includes) == 'function', '<function>', self.includes),
+		defines        = iif(type(self.defines)  == 'function', '<function>', self.defines),
+		links          = iif(type(self.links)    == 'function', '<function>', self.links),
+		libdirs        = iif(type(self.libdirs)  == 'function', '<function>', self.libdirs),
+		bindirs        = iif(type(self.bindirs)  == 'function', '<function>', self.bindirs),
 	}
 end
 
