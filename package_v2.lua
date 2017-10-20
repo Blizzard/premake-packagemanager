@@ -182,9 +182,15 @@ local function __createVariant(pkg, name, meta, dir)
 	variant.location   = dir
 	variant.script     = meta.premake
 	variant.testscript = meta.tests
-	variant.options    = meta.options
 	variant.package    = pkg
 	variant.loaded     = false
+
+	-- deal with package options.
+	if name == 'noarch' then
+		pkg.options = meta.options
+	elseif meta.options ~= nil then
+		error("Cannot specify package options in variants.")
+	end
 
 	-- if links wasn't set, then enumerate the libdirs if set
 	if meta.links == nil and meta.libdirs ~= nil then

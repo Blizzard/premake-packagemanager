@@ -36,9 +36,14 @@ local test_dir = os.getcwd()
 --
 -- Test setting option to a value.
 --
-	function suite.no_options_set_on()
-		setpackageoption('v2', 'multithreading', 'on')
-		import { ['v2'] = 'options' }
+	function suite.options_set_on()
+		import {
+			['v2'] = {
+				version = 'options',
+				multithreading = 'on'
+			}
+		}
+
 		prepare()
 
 		test.isequal({ "MULTITHREADING=1", "STACKSIZE=1024" }, prj.defines)
@@ -47,9 +52,13 @@ local test_dir = os.getcwd()
 --
 -- Test setting option to a value.
 --
-	function suite.no_options_set_off()
-		setpackageoption('v2', 'multithreading', 'off')
-		import { ['v2'] = 'options' }
+	function suite.options_set_off()
+		import {
+			['v2'] = {
+				version = 'options',
+				multithreading = 'off'
+			}
+		}
 		prepare()
 
 		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, prj.defines)
@@ -59,9 +68,13 @@ local test_dir = os.getcwd()
 --
 -- Test stacksize option
 --
-	function suite.no_options_set_stacksize()
-		setpackageoption('v2', 'stacksize', 4096)
-		import { ['v2'] = 'options' }
+	function suite.options_set_stacksize()
+		import {
+			['v2'] = {
+				version = 'options',
+				stacksize = 4096
+			}
+		}
 		prepare()
 
 		test.isequal({ "MULTITHREADING=0", "STACKSIZE=4096" }, prj.defines)

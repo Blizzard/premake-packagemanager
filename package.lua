@@ -57,12 +57,8 @@ package = package or {}
 
 
 ---
--- Set/Get an option for a package.
+-- Get an option for a package.
 ---
-	function setpackageoption(name, option, value)
-		p.packagemanager.setPackageOption(name, option, value)
-	end
-
 	function getpackageoption(name, option)
 		return p.packagemanager.getPackageOption(name, option)
 	end

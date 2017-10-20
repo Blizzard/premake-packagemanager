@@ -10,10 +10,11 @@ local m = p.modules.packagemanager
 
 function m.createPackageBase(name, version)
 	local pkg = {
-		name     = name,
-		version  = version,
-		projects = {},
-		variants = {}
+		name         = name,
+		version      = version,
+		projects     = {},
+		variants     = {},
+		optionValues = {}
 	}
 
 	local _cache = {}
@@ -136,6 +137,16 @@ function m.createPackageBase(name, version)
 		-- Store current scope.
 		local scope = p.api.scope.current
 
+		-- add the criteria prefixes temporarily.
+		if self.options then
+			for option, kind in pairs(self.options) do
+				if criteria._validPrefixes[option] then
+					p.error('Cannot use a predefined filter prefix: %s', option)
+				end
+				criteria._validPrefixes[option] = true
+			end
+		end
+
 		-- go through each variant that is loaded, and execute the initializer.
 		local errors = {}
 		for name, variant in pairs(self.variants) do
@@ -149,16 +160,6 @@ function m.createPackageBase(name, version)
 				local previous_package = package.current
 				package.current = variant
 
-				-- add the criteria prefixes temporarily.
-				if variant.options then
-					for _, option in ipairs(variant.options) do
-						if criteria._validPrefixes[option] then
-							p.error('Cannot use a predefined filter prefix: %s', option)
-						end
-						criteria._validPrefixes[option] = true
-					end
-				end
-
 				-- execute the callback, capture errors until the end, when scope is restored.
 				verbosef('initialize(%s, %s, %s)', self.name, name, operation or 'nil')
 				local ok, err = pcall(variant.initializer, 'project')
@@ -169,15 +170,15 @@ function m.createPackageBase(name, version)
 				-- and clear it, so we don't do it again in the future.
 				variant.initializer = nil
 
-				-- restore the criteria prefixes.
-				if variant.options then
-					for _, option in ipairs(variant.options) do
-						criteria._validPrefixes[option] = nil
-					end
-				end
-
 				-- restore package context.
 				package.current = previous_package
+			end
+		end
+
+		-- restore the criteria prefixes.
+		if self.options then
+			for option, kind in pairs(self.options) do
+				criteria._validPrefixes[option] = nil
 			end
 		end
 

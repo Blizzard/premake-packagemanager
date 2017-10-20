@@ -1,10 +1,10 @@
 project 'v2'
 	kind 'StaticLib'
 
-	filter { 'multithreading:on' }
+	filter { 'multithreading:true' }
 		defines { 'MULTITHREADING=1'}
 
-	filter { 'multithreading:not on' }
+	filter { 'multithreading:false' }
 		defines { 'MULTITHREADING=0'}
 
 	filter {}
@@ -14,3 +14,5 @@ project 'v2'
 	}
 
 
+	if getpackageoption("stacksize") then
+	end

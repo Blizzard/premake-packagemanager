@@ -245,6 +245,33 @@ local __loadedLockFile = nil
 	end
 
 
+	local function __setPackageOptions(pkg, options)
+		-- initialize options table with defaults.
+		if pkg.options then
+			for name, f in pairs(pkg.options) do
+				f._proc = premake.field.accessor({_kind=f.kind}, "store")
+				if f.default ~= nil then
+					pkg.optionValues[name] = f._proc(nil, nil, f.default, nil)
+				end
+			end
+		end
+
+		-- set options set through import.
+		if options ~= nil then
+			if not pkg.options then
+				p.error("Package '%s' has no options.", pkg.name)
+			end
+
+			for name, value in pairs(options) do
+				local f = pkg.options[name]
+				if f == nil then
+					p.error("Package '%s' has no '%s' option.", pkg.name, name)
+				end
+				pkg.optionValues[name] = f._proc(nil, nil, value, nil)
+			end
+		end
+	end
+
 
 --[ public functions ]----------------------------------------------------
 
@@ -298,8 +325,17 @@ local __loadedLockFile = nil
 				p.warn("Using the alias '%s' is deprecated, use the real name '%s'.\n   @%s\n", name, realname, caller)
 			end
 
+			-- is there an options table?
+			local options = nil
+			if type(version) == 'table' then
+				options = version
+				version = options.version
+				options.version = nil
+			end
+
 			if not wks.package_cache[realname] then
 				local pkg = __importPackage(realname, version)
+				__setPackageOptions(pkg, options)
 				table.insert(init_table, pkg)
 
 				wks.package_cache[realname] = pkg
@@ -365,25 +401,11 @@ local __loadedLockFile = nil
 
 
 ---
--- Set/Get an option for a package.
+-- Get an option for a package.
 ---
-	function pm.setPackageOption(name, option, value)
-		local realname = __getRealname(name):lower()
-		if pm.getPackage(realname) ~= nil then
-			error("Package options need to be set before you import the package.", 3)
-		end
-
-		local wks = p.api.scope.workspace
-		if wks == nil then
-			error("No workspace in scope.", 3)
-		end
-
-		-- store the value.
-		wks.package_options[realname] = wks.package_options[realname] or {}
-		wks.package_options[realname][option] = value
-	end
-
 	function pm.getPackageOption(name, option)
+		local pkg
+
 		if option == nil then
 			local project = p.api.scope.project or prj
 			if project == nil then
@@ -391,19 +413,17 @@ local __loadedLockFile = nil
 			end
 
 			option = name
-			name   = project.package.name
+			pkg    = project.package
+		else
+			local realname = __getRealname(name):lower()
+			pkg = pm.getPackage(realname)
 		end
 
-		local wks = p.api.scope.workspace
-		if wks == nil then
-			error("No workspace in scope.", 3)
+		if pkg == nil then
+			p.error("Package options can't be read.", 3)
 		end
 
-		local realname = __getRealname(name):lower()
-		local options = wks.package_options[realname]
-		if options ~= nil then
-			return options[option]
-		end
+		return pkg.optionValues[option]
 	end
 
 ---
@@ -426,7 +446,6 @@ local __loadedLockFile = nil
 	p.override(p.workspace, 'new', function(base, name)
 		local wks = base(name)
 		wks.package_cache   = wks.package_cache or {}
-		wks.package_options = wks.package_options or {}
 		return wks
 	end)
 
@@ -437,15 +456,9 @@ local __loadedLockFile = nil
 	p.override(p.context, 'compile', function(base, ctx)
 		-- if this is a project and it was generated from a package, inject package options
 		-- into filter context.
-		if (ctx == ctx.project) and ctx.frompackage and ctx.variant.options then
-			local options = ctx.workspace.package_options[ctx.package.name]
-			if options ~= nil then
-				for _, option in ipairs(ctx.variant.options) do
-					local value = options[option]
-					if value ~= nil then
-						p.context.addFilter(ctx, option, tostring(value))
-					end
-				end
+		if (ctx == ctx.project) and ctx.frompackage then
+			for name, value in pairs(ctx.package.optionValues) do
+				p.context.addFilter(ctx, name, value)
 			end
 		end
 
