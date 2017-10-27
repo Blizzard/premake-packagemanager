@@ -163,27 +163,31 @@ local function __createVariant(pkg, name, meta, dir)
 		error("Metadata entry for '" .. name .."' does not exist.")
 	end
 
-	m.checkType("includedirs", meta.includedirs, "table")
-	m.checkType("links",       meta.links,       "table")
-	m.checkType("libdirs",     meta.libdirs,     "table")
-	m.checkType("defines",     meta.defines,     "table")
-	m.checkType("bindirs",     meta.bindirs,     "table")
-	m.checkType("premake",     meta.premake,     "string")
-	m.checkType("tests",       meta.tests,       "string")
-	m.checkType("options",     meta.options,     "table")
+	m.checkType("includedirs",         meta.includedirs,         "table")
+	m.checkType("links",               meta.links,               "table")
+	m.checkType("libdirs",             meta.libdirs,             "table")
+	m.checkType("defines",             meta.defines,             "table")
+	m.checkType("bindirs",             meta.bindirs,             "table")
+	m.checkType("includedependencies", meta.includedependencies, "table")
+	m.checkType("linkdependencies",    meta.linkdependencies,    "table")
+	m.checkType("premake",             meta.premake,             "string")
+	m.checkType("tests",               meta.tests,               "string")
+	m.checkType("options",             meta.options,             "table")
 
 	local variant = m.createVariant(name)
-	variant.filter     = __createFilter(meta)
-	variant.includes   = meta.includedirs
-	variant.links      = meta.links
-	variant.libdirs    = meta.libdirs
-	variant.defines    = meta.defines
-	variant.bindirs    = meta.bindirs
-	variant.location   = dir
-	variant.script     = meta.premake
-	variant.testscript = meta.tests
-	variant.package    = pkg
-	variant.loaded     = false
+	variant.filter              = __createFilter(meta)
+	variant.includes            = meta.includedirs
+	variant.links               = meta.links
+	variant.libdirs             = meta.libdirs
+	variant.defines             = meta.defines
+	variant.bindirs             = meta.bindirs
+	variant.includedependencies = meta.includedependencies
+	variant.linkdependencies    = meta.linkdependencies
+	variant.location            = dir
+	variant.script              = meta.premake
+	variant.testscript          = meta.tests
+	variant.package             = pkg
+	variant.loaded              = false
 
 	-- deal with package options.
 	if name == 'noarch' then

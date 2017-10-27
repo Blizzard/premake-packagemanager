@@ -109,6 +109,16 @@ function m.createPackageBase(name, version)
 		return getProperties('bindirs', cfg, true)
 	end
 
+	-- setup auto-resolve for includedependencies.
+	function pkg.auto_includedependencies(cfg)
+		return getProperties('includedependencies', cfg, false)
+	end
+
+	-- setup auto-resolve for linkdependencies.
+	function pkg.auto_linkdependencies(cfg)
+		return getProperties('linkdependencies', cfg, false)
+	end
+
 	-- setup auto-resolve for includepath.
 	function pkg.auto_includepath(cfg)
 		local r = pkg.auto_includes(cfg)

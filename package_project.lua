@@ -26,29 +26,13 @@ function m.createProjectPackage(name, version)
 	local result = m.createPackageBase(name, version)
 
 	-- override base method.
-	result.auto_includes = function(cfg)
-		return {}
-	end
-
-	-- override base method.
-	result.auto_defines = function(cfg)
-		return {}
-	end
-
-	-- override base method.
-	result.auto_links = function(cfg)
-		return { name }
-	end
-
-	-- override base method.
-	result.auto_libdirs = function(cfg)
-		return {}
-	end
-
-	-- override base method.
-	result.auto_bindirs = function(cfg)
-		return { cfg.targetdir }
-	end
+	result.auto_includes            = function(cfg) return {} end
+	result.auto_defines             = function(cfg) return {} end
+	result.auto_links               = function(cfg) return { name } end
+	result.auto_libdirs             = function(cfg) return {} end
+	result.auto_bindirs             = function(cfg) return { cfg.targetdir } end
+	result.auto_includedependencies = function(cfg) return {} end
+	result.auto_linkdependencies    = function(cfg) return {} end
 
 	-- override base method.
 	function result:initialize()

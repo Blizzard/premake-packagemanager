@@ -8,4 +8,5 @@ return {
 	"test_package_v2_single_variant.lua",
 	"test_package_v2_multi_variant.lua",
 	"test_package_v2_options.lua",
+	"test_package_v2_transitive.lua",
 }

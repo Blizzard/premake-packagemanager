@@ -8,20 +8,22 @@ local p = premake
 local m = p.modules.packagemanager
 
 local __members = {
-	filter      = "table",
-	includes    = "table",
-	links       = "table",
-	libdirs     = "table",
-	defines     = "table",
-	bindirs     = "table",
-	location    = "string",
-	server      = "string",
-	script      = "string",
-	testscript  = "string",
-	initializer = "function",
-	loaded      = "boolean",
-	package     = "table",
-	options     = "table",
+	filter              = "table",
+	includes            = "table",
+	links               = "table",
+	libdirs             = "table",
+	defines             = "table",
+	bindirs             = "table",
+	includedependencies = "table",
+	linkdependencies    = "table",
+	location            = "string",
+	server              = "string",
+	script              = "string",
+	testscript          = "string",
+	initializer         = "function",
+	loaded              = "boolean",
+	package             = "table",
+	options             = "table",
 }
 
 local api = {}

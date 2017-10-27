@@ -138,13 +138,45 @@ local import_filter = {}
 			end
 		end
 
-		-- resolve package includes & defines
-		if ctx.includedependencies then
-			for name,_ in sortedpairs(ctx.includedependencies) do
+		local function addOrMoveToBottom(tbl, values)
+			for _, value in ipairs(values) do
+				if not table.insertkeyed(tbl, value) then
+					local idx = table.indexof(tbl, value)
+					table.remove(tbl, idx)
+					table.insert(tbl, value)
+				end
+			end
+		end
+
+		local function recursiveIncludeDependencies(ctx, deps)
+			for name,_ in sortedpairs(deps) do
 				local pkg = getpackage(ctx.workspace, name)
 				insertkeyed(ctx.includedirs, pkg.auto_includes(ctx))
 				insertkeyed(ctx.defines,     pkg.auto_defines(ctx))
+				recursiveIncludeDependencies(ctx, pkg.auto_includedependencies(ctx))
 			end
+		end
+
+		local function recursiveLinkDependencies(ctx, deps)
+			for name,value in sortedpairs(deps) do
+				local filter = nil
+				if type(value) == 'table' then
+					filter = __createFilter(value)
+				else
+					filter = __createFilter(__defaultImportFilter(name))
+				end
+
+				local pkg = getpackage(ctx.workspace, name)
+				addOrMoveToBottom(ctx.links, filter(pkg.auto_links(ctx)))
+
+				insertkeyed(ctx.libdirs, pkg.auto_libdirs(ctx))
+				recursiveLinkDependencies(ctx, pkg.auto_linkdependencies(ctx))
+			end
+		end
+
+		-- resolve package includes & defines
+		if ctx.includedependencies then
+			recursiveIncludeDependencies(ctx, ctx.includedependencies);
 		end
 
 		-- resolve package binpath.
@@ -178,18 +210,7 @@ local import_filter = {}
 
 		-- resolve package links.
 		if ctx.linkdependencies then
-			for name, value in sortedpairs(ctx.linkdependencies) do
-				local filter = nil
-				if type(value) == 'table' then
-					filter = __createFilter(value)
-				else
-					filter = __createFilter(__defaultImportFilter(name))
-				end
-
-				local pkg = getpackage(ctx.workspace, name)
-				insertkeyed(ctx.links, filter(pkg.auto_links(ctx)))
-				table.insertflat(ctx.libdirs, pkg.auto_libdirs(ctx))
-			end
+			recursiveLinkDependencies(ctx, ctx.linkdependencies)
 		end
 
 		ctx.packages_resolved = true
