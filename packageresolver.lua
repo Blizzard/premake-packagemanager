@@ -132,16 +132,18 @@ local import_filter = {}
 			end
 		end
 
+		local function insertkeyed(tbl, values)
+			for _, value in ipairs(values) do
+				table.insertkeyed(tbl, value)
+			end
+		end
+
 		-- resolve package includes & defines
 		if ctx.includedependencies then
 			for name,_ in sortedpairs(ctx.includedependencies) do
 				local pkg = getpackage(ctx.workspace, name)
-				for _, dir in ipairs(pkg.auto_includes(ctx)) do
-					table.insertkeyed(ctx.includedirs, dir)
-				end
-				for _, def in ipairs(pkg.auto_defines(ctx)) do
-					table.insertkeyed(ctx.defines, def)
-				end
+				insertkeyed(ctx.includedirs, pkg.auto_includes(ctx))
+				insertkeyed(ctx.defines,     pkg.auto_defines(ctx))
 			end
 		end
 
@@ -149,9 +151,7 @@ local import_filter = {}
 		if ctx.bindirdependencies then
 			for name,_ in sortedpairs(ctx.bindirdependencies) do
 				local pkg = getpackage(ctx.workspace, name)
-				for _, dir in ipairs(pkg.auto_bindirs(ctx)) do
-					table.insertkeyed(ctx.bindirs, dir)
-				end
+				insertkeyed(ctx.bindirs, pkg.auto_bindirs(ctx))
 			end
 		end
 
@@ -163,7 +163,7 @@ local import_filter = {}
 
 			for name, value in sortedpairs(ctx.copybindependencies) do
 				local pkg = getpackage(ctx.workspace, name)
-				for _, dir in pairs(pkg.auto_bindirs(ctx)) do
+				for _, dir in ipairs(pkg.auto_bindirs(ctx)) do
 					local src = project.getrelative(ctx.project, dir)
 					local dst = project.getrelative(ctx.project, targetDir)
 
@@ -187,11 +187,7 @@ local import_filter = {}
 				end
 
 				local pkg = getpackage(ctx.workspace, name)
-
-				local links = filter(pkg.auto_links(ctx))
-				for _, link in ipairs(links) do
-					table.insertkeyed(ctx.links, link)
-				end
+				insertkeyed(ctx.links, filter(pkg.auto_links(ctx)))
 				table.insertflat(ctx.libdirs, pkg.auto_libdirs(ctx))
 			end
 		end
