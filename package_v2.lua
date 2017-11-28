@@ -149,6 +149,7 @@ end
 local function __createFilter(meta)
 	return m.validateFilter({
 		system         = meta.system,
+		host           = meta.host,
 		architecture   = meta.architecture,
 		toolset        = meta.toolset,
 		action         = meta.action,

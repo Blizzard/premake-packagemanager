@@ -32,6 +32,7 @@ local api = {}
 function m.validateFilter(f)
 	local _validKeys = {
 		["system"]         = "string",
+		["host"]           = "string",
 		["architecture"]   = "string",
 		["toolset"]        = "string",
 		["action"]         = "string",
@@ -66,6 +67,7 @@ function api:matches(filter)
 
 		local tbl = {}
 		add(tbl, "system:" ,        f.system)
+		add(tbl, "host:" ,          f.host)
 		add(tbl, "architecture:",   f.architecture)
 		add(tbl, "toolset:",        f.toolset)
 		add(tbl, "action:",         f.action)
@@ -92,6 +94,7 @@ function api:generateManifest(tbl, wks)
 	tbl[self.name] = {
 		location       = p.workspace.getrelative(wks, self.location),
 		system         = self.filter.system,
+		host           = self.filter.host,
 		architecture   = self.filter.architecture,
 		toolset        = self.filter.toolset,
 		action         = self.filter.action,
