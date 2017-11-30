@@ -490,13 +490,26 @@ local __loadedLockFile = nil
 		if not pkg.options then
 			return
 		end
-		printf('  Package: %s', name)
+		printf('  Package: %s-%s', pkg.name, pkg.version)
 		printf('  --------------------------')
+
+		local k_length = 0
+		local n_length = 0
 		for name, f in pairs(pkg.options) do
+			if (#f.kind > k_length) then k_length = #f.kind end
+			if (#name > n_length) then n_length = #name end
+		end
+
+		local fmt = "  %-" .. k_length .. "s %-" .. n_length .. "s %s %s"
+		for name, f in spairs(pkg.options) do
+			local k = string.format("%-" .. k_length .. "s", f.kind)
+			local n = string.format("%-" .. n_length .. "s", name)
+			local r = iif(f.required, "[required]", "[optional]")
+
 			if f.default ~= nil then
-				printf('  %s [%s] - %s (default: %s)', name, f.kind, f.description, tostring(f.default))
+				printf("  %s %s (default: %s) %s", k, n, tostring(f.default), f.description or '');
 			else
-				printf('  %s [%s] - %s', name, f.kind, f.description)
+				printf("  %s %s %s %s", k, n, r, f.description or '');
 			end
 		end
 	end
