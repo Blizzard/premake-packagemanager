@@ -270,6 +270,15 @@ local __loadedLockFile = nil
 				pkg.optionValues[name] = f._proc(nil, nil, value, nil)
 			end
 		end
+
+		-- check if all required options have a value.
+		if pkg.options then
+			for name, f in pairs(pkg.options) do
+				if f.required and pkg.optionValues[name] == nil then
+					p.error("Option '%s' is required for package '%s'.", name, pkg.name)
+				end
+			end
+		end
 	end
 
 
@@ -477,6 +486,21 @@ local __loadedLockFile = nil
 		end
 	end
 
+	function pm._printPackageOptions(pkg)
+		if not pkg.options then
+			return
+		end
+		printf('  Package: %s', name)
+		printf('  --------------------------')
+		for name, f in pairs(pkg.options) do
+			if f.default ~= nil then
+				printf('  %s [%s] - %s (default: %s)', name, f.kind, f.description, tostring(f.default))
+			else
+				printf('  %s [%s] - %s', name, f.kind, f.description)
+			end
+		end
+	end
+
 ---
 -- override 'project' so that when a package defines a new project we initialize it with some default values.
 ---
@@ -568,6 +592,30 @@ local __loadedLockFile = nil
 		end
 
 		-- now run the prebake.
+		base()
+	end)
+
+
+---
+--- provide help for package options.
+---
+	p.override(p.main, 'processCommandLine', function(base)
+		if (_OPTIONS["package-help"]) then
+			print('Package options:')
+			print();
+			for wks in p.global.eachWorkspace() do
+				printf('Workspace: %s', wks.name)
+				printf('--------------------------')
+				for name, pkg in pairs(wks.package_cache) do
+					if not __aliases[name] then
+						pm._printPackageOptions(pkg)
+					end
+				end
+			end
+			print('--------------------------')
+			print('done.');
+			os.exit(1)
+		end
 		base()
 	end)
 

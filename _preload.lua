@@ -24,12 +24,16 @@ local p = premake
 		description = 'Disable http queries to package server.'
 	}
 
-	newoption
-	{
+	newoption {
 		trigger = 'to',
 		default = 'build',
 		value   = 'path',
 		description = 'Set the output location for the generated files'
+	}
+
+	newoption {
+		trigger = "package-help",
+		description = "Display all package options for all imported packages."
 	}
 
 ---
