@@ -122,10 +122,10 @@ local p = premake
 	}
 
 	-- initialize sane defaults.
-	package_location (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, 'projects/packages'))
-	package_bindir   (path.join(_MAIN_SCRIPT_DIR, "bin/%{premake.packagemanager.buildVariantFromConfig(cfg)}"))
-	package_objdir   (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, '%{premake.packagemanager.buildVariantFromConfig(cfg)}', 'obj'))
-	package_libdir   (path.join(_MAIN_SCRIPT_DIR, _OPTIONS.to, '%{premake.packagemanager.buildVariantFromConfig(cfg)}', 'lib'))
+	package_location '%{path.join(sln.location, "projects/packages")}'
+	package_bindir   '%{path.join(_MAIN_SCRIPT_DIR, "bin", premake.packagemanager.buildVariantFromConfig(cfg))}'
+	package_objdir   '%{path.join(sln.location, "obj", premake.packagemanager.buildVariantFromConfig(cfg))}'
+	package_libdir   '%{path.join(sln.location, "lib", premake.packagemanager.buildVariantFromConfig(cfg))}'
 
 ---
 -- shortcut if you need both include & link dependencies
