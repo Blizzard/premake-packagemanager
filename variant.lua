@@ -13,6 +13,7 @@ local __members = {
 	links               = "table",
 	libdirs             = "table",
 	defines             = "table",
+	dependson           = "table",
 	bindirs             = "table",
 	includedependencies = "table",
 	linkdependencies    = "table",
@@ -100,11 +101,12 @@ function api:generateManifest(tbl, wks)
 		action         = self.filter.action,
 		configurations = self.filter.configurations,
 		tags           = self.filter.tags,
-		includedirs    = iif(type(self.includes) == 'function', '<function>', self.includes),
-		defines        = iif(type(self.defines)  == 'function', '<function>', self.defines),
-		links          = iif(type(self.links)    == 'function', '<function>', self.links),
-		libdirs        = iif(type(self.libdirs)  == 'function', '<function>', self.libdirs),
-		bindirs        = iif(type(self.bindirs)  == 'function', '<function>', self.bindirs),
+		includedirs    = iif(type(self.includes)  == 'function', '<function>', self.includes),
+		defines        = iif(type(self.defines)   == 'function', '<function>', self.defines),
+		dependson      = iif(type(self.dependson) == 'function', '<function>', self.dependson),
+		links          = iif(type(self.links)     == 'function', '<function>', self.links),
+		libdirs        = iif(type(self.libdirs)   == 'function', '<function>', self.libdirs),
+		bindirs        = iif(type(self.bindirs)   == 'function', '<function>', self.bindirs),
 	}
 end
 

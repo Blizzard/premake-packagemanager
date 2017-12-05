@@ -94,6 +94,11 @@ function m.createPackageBase(name, version)
 		return getProperties('defines', cfg, false)
 	end
 
+	-- setup auto-resolve for dependson.
+	function pkg.auto_dependson(cfg)
+		return getProperties('dependson', cfg, false)
+	end
+
 	-- setup auto-resolve for links.
 	function pkg.auto_links(cfg)
 		return getProperties('links', cfg, false)

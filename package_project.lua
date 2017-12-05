@@ -28,6 +28,7 @@ function m.createProjectPackage(name, version)
 	-- override base method.
 	result.auto_includes            = function(cfg) return {} end
 	result.auto_defines             = function(cfg) return {} end
+	result.auto_dependson           = function(cfg) return {} end
 	result.auto_links               = function(cfg) return { name } end
 	result.auto_libdirs             = function(cfg) return {} end
 	result.auto_bindirs             = function(cfg) return { cfg.targetdir } end

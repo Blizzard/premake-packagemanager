@@ -168,6 +168,7 @@ local function __createVariant(pkg, name, meta, dir)
 	m.checkType("links",               meta.links,               "table")
 	m.checkType("libdirs",             meta.libdirs,             "table")
 	m.checkType("defines",             meta.defines,             "table")
+	m.checkType("dependson",           meta.dependson,           "table")
 	m.checkType("bindirs",             meta.bindirs,             "table")
 	m.checkType("includedependencies", meta.includedependencies, "table")
 	m.checkType("linkdependencies",    meta.linkdependencies,    "table")
@@ -183,6 +184,7 @@ local function __createVariant(pkg, name, meta, dir)
 	variant.libdirs             = meta.libdirs
 	variant.defines             = meta.defines
 	variant.bindirs             = meta.bindirs
+	variant.dependson           = meta.dependson
 	variant.includedependencies = table.join(meta.usedependencies or {}, meta.includedependencies)
 	variant.linkdependencies    = table.join(meta.usedependencies or {}, meta.linkdependencies)
 	variant.location            = dir

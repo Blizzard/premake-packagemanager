@@ -153,6 +153,7 @@ local import_filter = {}
 				local pkg = getpackage(ctx.workspace, name)
 				insertkeyed(ctx.includedirs, pkg.auto_includes(ctx))
 				insertkeyed(ctx.defines,     pkg.auto_defines(ctx))
+				insertkeyed(ctx.dependson,   pkg.auto_dependson(ctx))
 				recursiveIncludeDependencies(ctx, pkg.auto_includedependencies(ctx))
 			end
 		end
