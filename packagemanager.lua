@@ -15,6 +15,7 @@ local m = p.modules.packagemanager
 p.packagemanager = {
 	cache_location    = nil,
 	folders           = {},
+	aliases           = {},
 	servers           = {
 		'http://***REMOVED***',
 		'http://***REMOVED***'
@@ -53,6 +54,14 @@ local __loadedLockFile = nil
 	local function __getAliasTable(name)
 		-- if we don't want server queries, just return the local results.
 		if _OPTIONS['no-http'] or (pm.servers == nil) then
+			if pm.aliases[name] then
+				local aliases = {}
+				for _, alias in ipairs(pm.aliases[name]) do
+					table.insert(aliases, alias:lower())
+					print(alias)
+				end
+				return name:lower(), aliases
+			end
 			return name:lower(), {}
 		end
 
@@ -442,6 +451,7 @@ local __loadedLockFile = nil
 		__loaded = {}
 		pm.cache_location    = nil
 		pm.folders           = {}
+		pm.aliases           = {}
 		pm.servers           = {
 			'http://***REMOVED***',
 			'http://***REMOVED***'
@@ -572,6 +582,9 @@ local __loadedLockFile = nil
 				rawset(tbl, key, value)
 			elseif (key == "servers") then
 				assert(type(value) == "table", "servers must be a table.")
+				rawset(tbl, key, value)
+			elseif (key == "aliases") then
+				assert(type(value) == "table", "aliases must be a table.")
 				rawset(tbl, key, value)
 			else
 				error("Attempt to modify packagemanager field: " .. key)
