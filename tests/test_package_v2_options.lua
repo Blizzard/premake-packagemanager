@@ -30,7 +30,8 @@ local test_dir = os.getcwd()
 		import { ['v2'] = 'options' }
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
+		test.isequal(2, #cfg.defines)
+		test.contains({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -46,7 +47,8 @@ local test_dir = os.getcwd()
 
 		prepare()
 
-		test.isequal({ "MULTITHREADING=1", "STACKSIZE=1024" }, cfg.defines)
+		test.isequal(2, #cfg.defines)
+		test.contains({ "MULTITHREADING=1", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -61,7 +63,8 @@ local test_dir = os.getcwd()
 		}
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
+		test.isequal(2, #cfg.defines)
+		test.contains({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 
@@ -77,7 +80,8 @@ local test_dir = os.getcwd()
 		}
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=4096" }, cfg.defines)
+		test.isequal(2, #cfg.defines)
+		test.contains({ "MULTITHREADING=0", "STACKSIZE=4096" }, cfg.defines)
 	end
 
 
@@ -96,7 +100,9 @@ local test_dir = os.getcwd()
 			includedependencies { 'v2' }
 
 		local cfg = test.getconfig(prj, "Debug")
-		test.isequal({ "BC_STACK_SIZE=1024" }, cfg.defines)
+
+		test.isequal(1, #cfg.defines)
+		test.contains({ "BC_STACK_SIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -115,8 +121,8 @@ local test_dir = os.getcwd()
 
 		local cfg = test.getconfig(prj, "Debug")
 
-		test.print(table.tostring(cfg.defines))
-		test.isequal({ "BC_ENABLE_MULTITHREADING", "BC_STACK_SIZE=1024" }, cfg.defines)
+		test.isequal(2, #cfg.defines)
+		test.contains({ "BC_ENABLE_MULTITHREADING", "BC_STACK_SIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -135,6 +141,7 @@ local test_dir = os.getcwd()
 
 		local cfg = test.getconfig(prj, "Debug")
 
-		test.isequal({ "BC_STACK_SIZE=4096" }, cfg.defines)
+		test.isequal(1, #cfg.defines)
+		test.contains({ "BC_STACK_SIZE=4096" }, cfg.defines)
 	end
 
