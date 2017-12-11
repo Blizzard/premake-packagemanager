@@ -154,11 +154,26 @@ function m.createPackageBase(name, version)
 
 		-- add the criteria prefixes temporarily.
 		if self.options then
-			for option, kind in pairs(self.options) do
+			local noarch = self.variants['noarch']
+			for option, f in pairs(self.options) do
+				-- make sure we can set the options as a filter.
 				if criteria._validPrefixes[option] then
 					p.error('Cannot use a predefined filter prefix: %s', option)
 				end
 				criteria._validPrefixes[option] = true
+
+				-- deal with exporting defines from package options.
+				if noarch and f.define then
+					if f.kind == 'boolean' then
+						if self.optionValues[option] then
+							noarch.defines = noarch.defines or {}
+							table.insert(noarch.defines, f.define)
+						end
+					else
+						noarch.defines = noarch.defines or {}
+						table.insert(noarch.defines, f.define .. '=' .. self.optionValues[option])
+					end
+				end
 			end
 		end
 

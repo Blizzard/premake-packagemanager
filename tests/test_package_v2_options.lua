@@ -30,7 +30,7 @@ local test_dir = os.getcwd()
 		import { ['v2'] = 'options' }
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, prj.defines)
+		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -46,7 +46,7 @@ local test_dir = os.getcwd()
 
 		prepare()
 
-		test.isequal({ "MULTITHREADING=1", "STACKSIZE=1024" }, prj.defines)
+		test.isequal({ "MULTITHREADING=1", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 --
@@ -61,7 +61,7 @@ local test_dir = os.getcwd()
 		}
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, prj.defines)
+		test.isequal({ "MULTITHREADING=0", "STACKSIZE=1024" }, cfg.defines)
 	end
 
 
@@ -77,6 +77,63 @@ local test_dir = os.getcwd()
 		}
 		prepare()
 
-		test.isequal({ "MULTITHREADING=0", "STACKSIZE=4096" }, prj.defines)
+		test.isequal({ "MULTITHREADING=0", "STACKSIZE=4096" }, cfg.defines)
+	end
+
+
+--
+-- Test use exported defines option
+--
+	function suite.use_options_define_boolean_off()
+		import {
+			['v2'] = {
+				version = 'options',
+				multithreading = 'off'
+			}
+		}
+
+		local prj = project 'useV2'
+			includedependencies { 'v2' }
+
+		local cfg = test.getconfig(prj, "Debug")
+		test.isequal({ "BC_STACK_SIZE=1024" }, cfg.defines)
+	end
+
+--
+-- Test use exported defines option
+--
+	function suite.use_options_define_boolean_on()
+		import {
+			['v2'] = {
+				version = 'options',
+				multithreading = 'on'
+			}
+		}
+
+		local prj = project 'useV2'
+			includedependencies { 'v2' }
+
+		local cfg = test.getconfig(prj, "Debug")
+
+		test.isequal({ "BC_ENABLE_MULTITHREADING", "BC_STACK_SIZE=1024" }, cfg.defines)
+	end
+
+--
+-- Test use exported defines option
+--
+	function suite.use_options_define_value()
+		import {
+			['v2'] = {
+				version = 'options',
+				stacksize = 4096
+			}
+		}
+
+		local prj = project 'useV2'
+			includedependencies { 'v2' }
+
+		local cfg = test.getconfig(prj, "Debug")
+
+		test.isequal({ "BC_STACK_SIZE=4096" }, cfg.defines)
 	end
 
