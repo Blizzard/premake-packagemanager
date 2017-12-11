@@ -80,6 +80,7 @@ local function __download(pkg, var)
 	for i, folder in pairs(p.packagemanager.folders) do
 		local location = m.createPackageLocation(folder, name, version, variant)
 		if os.isdir(location) then
+			location = path.getabsolute(location)
 			verbosef('LOCAL: %s', location)
 			return location
 		end
@@ -88,6 +89,7 @@ local function __download(pkg, var)
 	-- then try the package cache.
 	local location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, version, variant)
 	if os.isdir(location) then
+		location = path.getabsolute(location)
 		verbosef('CACHED: %s', location)
 		return location
 	end

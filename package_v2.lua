@@ -75,6 +75,7 @@ local function __getPackageFolder(name, version)
 	-- test if version is a folder name.
 	if os.isdir(version) then
 		if __isPackage(version) then
+			version = path.getabsolute(version)
 			verbosef(' LOCAL: %s', version)
 			return version
 		end
@@ -84,6 +85,7 @@ local function __getPackageFolder(name, version)
 	for _, folder in ipairs(p.packagemanager.folders) do
 		local location = m.createPackageLocation(folder, name, version)
 		if __isPackage(location) then
+			location = path.getabsolute(location)
 			verbosef(' LOCAL: %s', location)
 			return location
 		end
@@ -92,6 +94,7 @@ local function __getPackageFolder(name, version)
 	-- test if we downloaded it already.
 	local location = m.createPackageLocation(p.packagemanager.getCacheLocation(), name, version)
 	if __isPackage(location) then
+		location = path.getabsolute(location)
 		verbosef(' CACHED: %s', location)
 		return location
 	end
