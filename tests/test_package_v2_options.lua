@@ -115,6 +115,7 @@ local test_dir = os.getcwd()
 
 		local cfg = test.getconfig(prj, "Debug")
 
+		test.print(table.tostring(cfg.defines))
 		test.isequal({ "BC_ENABLE_MULTITHREADING", "BC_STACK_SIZE=1024" }, cfg.defines)
 	end
 
