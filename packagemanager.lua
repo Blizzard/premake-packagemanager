@@ -475,8 +475,9 @@ local __loadedLockFile = nil
 	p.override(p.context, 'compile', function(base, ctx)
 		-- if this is a project and it was generated from a package, inject package options
 		-- into filter context.
-		if (ctx == ctx.project) and ctx.frompackage then
-			for name, value in pairs(ctx.package.optionValues) do
+		local prj = ctx.project
+		if prj ~= nil and prj.frompackage then
+			for name, value in pairs(prj.package.optionValues) do
 				p.context.addFilter(ctx, name, value)
 			end
 		end
