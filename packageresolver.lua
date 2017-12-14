@@ -159,7 +159,7 @@ local import_filter = {}
 		end
 
 		local function recursiveLinkDependencies(ctx, deps)
-			for name,value in sortedpairs(deps) do
+			for name, value in sortedpairs(deps) do
 				local filter = nil
 				if type(value) == 'table' then
 					filter = __createFilter(value)
@@ -209,8 +209,18 @@ local import_filter = {}
 			end
 		end
 
+		-- we don't want static libs with links.
+		if ctx.links and next(ctx.links) and ctx.kind == p.STATICLIB then
+			local prjname = iif(ctx.project, ctx.project.name, ctx.name)
+			p.warnOnce(prjname..'l', "The project '" .. prjname .. "' is a static library, but uses 'links', for buildorder use 'dependson'.")
+		end
+
 		-- resolve package links.
-		if ctx.linkdependencies then
+		if ctx.linkdependencies and next(ctx.linkdependencies) then
+			if ctx.kind == p.STATICLIB then
+				local prjname = iif(ctx.project, ctx.project.name, ctx.name)
+				p.warnOnce(prjname..'d', "The project '" .. prjname .. "' is a static library, but uses 'use/linkdependencies'.")
+			end
 			recursiveLinkDependencies(ctx, ctx.linkdependencies)
 		end
 
